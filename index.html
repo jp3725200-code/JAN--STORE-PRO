@@ -1,1 +1,301 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100d1d">
+<title>JANØ STORE PRO</title>
+<style>
+:root{--bg:#100d1d;--panel:#1b1729;--panel2:#242037;--purple:#9670ff;--blue:#8bc5ff;--text:#f6f2ff;--muted:#aaa3bd;--green:#4cdda0;--red:#ff7185}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{padding:20px;background:linear-gradient(120deg,#29184c,#151225);border-bottom:1px solid #39304d;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:900;letter-spacing:1px}
+.logo span{color:var(--purple)}
+header small{color:var(--muted)}
+nav{display:flex;gap:7px;padding:12px;overflow-x:auto;background:#151222;position:sticky;top:0;z-index:5}
+nav button{background:var(--panel);border:1px solid #39324c;color:var(--text);padding:11px 15px;border-radius:10px;white-space:nowrap}
+nav button.active{background:var(--purple);color:#fff}
+main{padding:16px;max-width:1100px;margin:auto}
+.page{display:none}.page.active{display:block}
+h2{font-size:21px;margin:10px 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid #302a43;border-radius:15px;padding:16px;margin-bottom:12px}
+.stat small{color:var(--muted)}
+.stat strong{display:block;font-size:23px;margin-top:12px}
+.purple{color:var(--purple)}.green{color:var(--green)}.red{color:var(--red)}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+input,select{width:100%;padding:13px;background:#100d1d;border:1px solid #403752;border-radius:9px;color:white;font-size:15px;min-width:0}
+button{cursor:pointer;font-size:14px}
+.primary{background:var(--purple);color:white;border:0;padding:13px 18px;border-radius:9px;font-weight:bold}
+.secondary{background:var(--panel2);color:white;border:1px solid #49405e;padding:10px 14px;border-radius:9px}
+.danger{background:#512532;color:#ffb6c0;border:0;padding:8px 11px;border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+th,td{padding:12px 10px;text-align:right;border-bottom:1px solid #393148;font-size:13px}
+th{color:var(--blue)}
+.table-wrap{overflow-x:auto}
+.empty{text-align:center;color:var(--muted);padding:25px}
+.hint{color:var(--muted);font-size:12px;line-height:1.8}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+footer{text-align:center;color:var(--muted);padding:25px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+ <div>
+  <div class="logo">JANØ <span>STORE PRO</span></div>
+  <small>نظام إدارة ومحاسبة المتجر</small>
+ </div>
+ <div><small id="today"></small></div>
+</header>
+<nav>
+ <button class="active" data-page="dashboard">الرئيسية</button>
+ <button data-page="products">المنتجات</button>
+ <button data-page="sale">المبيعات</button>
+ <button data-page="purchase">المشتريات</button>
+ <button data-page="records">العمليات</button>
+ <button data-page="reports">التقارير</button>
+</nav>
+<main>
+<section id="dashboard" class="page active">
+ <h2>لوحة التحكم</h2>
+ <div class="grid">
+  <div class="card stat"><small>إجمالي المبيعات</small><strong class="green" id="salesTotal">0</strong></div>
+  <div class="card stat"><small>إجمالي المشتريات</small><strong id="purchaseTotal">0</strong></div>
+  <div class="card stat"><small>الأرباح التقديرية</small><strong class="purple" id="profitTotal">0</strong></div>
+  <div class="card stat"><small>عدد المنتجات</small><strong id="productCount">0</strong></div>
+  <div class="card stat"><small>قيمة المخزون بسعر التكلفة</small><strong id="stockValue">0</strong></div>
+  <div class="card stat"><small>عمليات اليوم</small><strong id="todayCount">0</strong></div>
+ </div>
+ <div class="card">
+  <h3>مرحباً بك في JANØ STORE PRO</h3>
+  <p class="hint">ابدأ بإضافة المنتجات إلى المخزون، ثم سجّل المبيعات والمشتريات. ستتحدث الإحصائيات تلقائياً.</p>
+  <div class="actions">
+   <button class="primary" onclick="showPage('products')">إضافة منتج</button>
+   <button class="secondary" onclick="showPage('sale')">تسجيل بيع</button>
+   <button class="secondary" onclick="showPage('purchase')">تسجيل شراء</button>
+  </div>
+ </div>
+ <div class="card">
+  <h3>آخر العمليات</h3>
+  <div id="recent"></div>
+ </div>
+</section>
+
+<section id="products" class="page">
+ <h2>إدارة المنتجات والمخزون</h2>
+ <div class="card">
+  <h3>إضافة منتج جديد</h3>
+  <form id="productForm">
+   <input id="pname" placeholder="اسم المنتج" required>
+   <input id="pcode" placeholder="رمز أو باركود المنتج">
+   <input id="pcost" type="number" min="0" step="0.01" placeholder="سعر الشراء" required>
+   <input id="pprice" type="number" min="0" step="0.01" placeholder="سعر البيع" required>
+   <input id="pqty" type="number" min="0" step="1" placeholder="الكمية الحالية" required>
+   <input id="pcat" placeholder="التصنيف (أحذية، مكياج...)">
+   <button class="primary" type="submit">حفظ المنتج</button>
+  </form>
+ </div>
+ <div class="card">
+  <h3>قائمة المنتجات</h3>
+  <input id="productSearch" placeholder="ابحث عن منتج..." oninput="renderProducts()">
+  <div class="table-wrap"><table>
+   <thead><tr><th>المنتج</th><th>الرمز</th><th>التكلفة</th><th>البيع</th><th>المخزون</th><th>التصنيف</th><th>حذف</th></tr></thead>
+   <tbody id="productRows"></tbody>
+  </table></div>
+ </div>
+</section>
+
+<section id="sale" class="page">
+ <h2>تسجيل عملية بيع</h2>
+ <div class="card">
+  <form id="saleForm">
+   <select id="saleProduct" required><option value="">اختر المنتج</option></select>
+   <input id="saleQty" type="number" min="1" step="1" placeholder="الكمية المباعة" required>
+   <input id="salePrice" type="number" min="0" step="0.01" placeholder="سعر بيع الوحدة" required>
+   <input id="saleCustomer" placeholder="اسم الزبون (اختياري)">
+   <button class="primary" type="submit">تأكيد البيع</button>
+  </form>
+  <p class="hint">سيتم خصم الكمية من المخزون وحساب الربح التقديري تلقائياً.</p>
+ </div>
+</section>
+
+<section id="purchase" class="page">
+ <h2>تسجيل عملية شراء</h2>
+ <div class="card">
+  <form id="purchaseForm">
+   <select id="purchaseProduct" required><option value="">اختر المنتج</option></select>
+   <input id="purchaseQty" type="number" min="1" step="1" placeholder="الكمية المشتراة" required>
+   <input id="purchasePrice" type="number" min="0" step="0.01" placeholder="تكلفة الوحدة" required>
+   <input id="purchaseSupplier" placeholder="اسم المورد (اختياري)">
+   <button class="primary" type="submit">تأكيد الشراء</button>
+  </form>
+  <p class="hint">سيتم إضافة الكمية إلى المخزون وتحديث تكلفة المنتج.</p>
+ </div>
+</section>
+
+<section id="records" class="page">
+ <h2>سجل العمليات</h2>
+ <div class="card">
+  <div class="table-wrap"><table>
+   <thead><tr><th>التاريخ</th><th>النوع</th><th>المنتج</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>الطرف</th><th>حذف</th></tr></thead>
+   <tbody id="recordRows"></tbody>
+  </table></div>
+ </div>
+</section>
+
+<section id="reports" class="page">
+ <h2>التقارير المالية</h2>
+ <div class="grid">
+  <div class="card stat"><small>إجمالي دخل المبيعات</small><strong id="rSales">0</strong></div>
+  <div class="card stat"><small>تكلفة البضائع المباعة</small><strong id="rCost">0</strong></div>
+  <div class="card stat"><small>الربح الإجمالي التقديري</small><strong class="green" id="rProfit">0</strong></div>
+  <div class="card stat"><small>إجمالي المشتريات</small><strong id="rPurchase">0</strong></div>
+ </div>
+ <div class="card">
+  <h3>النسخ الاحتياطي</h3>
+  <p class="hint">احفظ نسخة من بياناتك في ملف، أو استعد نسخة سابقة. احتفظ بنسخة احتياطية بشكل دوري.</p>
+  <div class="actions">
+   <button class="primary" onclick="backup()">تصدير نسخة احتياطية</button>
+   <button class="secondary" onclick="document.getElementById('restoreFile').click()">استعادة نسخة</button>
+   <input id="restoreFile" type="file" accept=".json,application/json" hidden onchange="restoreBackup(event)">
+  </div>
+ </div>
+ <div class="card">
+  <h3>تنبيه مهم</h3>
+  <p class="hint">هذه نسخة أولية تحفظ البيانات محلياً على المتصفح. ليست بعد نظاماً سحابياً أو متعدد المستخدمين، ولا تغني عن النسخ الاحتياطي المنتظم.</p>
+ </div>
+</section>
+</main>
+<footer>JANØ STORE PRO · إدارة أذكى لمتجرك</footer>
+
+<script>
+const KEY="jano_store_pro_v1";
+let db={products:[],records:[]};
+try{const saved=localStorage.getItem(KEY);if(saved)db=JSON.parse(saved)}catch(e){}
+const money=n=>Number(n||0).toLocaleString("ar",{maximumFractionDigits:2});
+const el=id=>document.getElementById(id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>new Date().toLocaleDateString("ar");
+el("today").textContent=today();
+
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+ window.scrollTo(0,0);
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+
+el("productForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const name=el("pname").value.trim();
+ const code=el("pcode").value.trim();
+ const cost=Number(el("pcost").value),price=Number(el("pprice").value),qty=Number(el("pqty").value);
+ if(!name||cost<0||price<0||qty<0)return alert("تأكد من البيانات");
+ if(code&&db.products.some(p=>p.code===code))return alert("هذا الرمز مستخدم مسبقاً");
+ db.products.push({id:uid(),name,code,cost,price,qty,cat:el("pcat").value.trim()});
+ e.target.reset();save();alert("تم حفظ المنتج بنجاح");
+});
+
+function renderProducts(){
+ const q=(el("productSearch").value||"").trim().toLowerCase();
+ const rows=db.products.filter(p=>(p.name+" "+p.code+" "+p.cat).toLowerCase().includes(q));
+ el("productRows").innerHTML=rows.length?rows.map(p=>`<tr>
+ <td>${esc(p.name)}</td><td>${esc(p.code||"-")}</td><td>${money(p.cost)}</td>
+ <td>${money(p.price)}</td><td>${money(p.qty)}</td><td>${esc(p.cat||"-")}</td>
+ <td><button class="danger" onclick="deleteProduct('${p.id}')">حذف</button></td></tr>`).join(""):`<tr><td colspan="7" class="empty">لا توجد منتجات بعد</td></tr>`;
+}
+function deleteProduct(id){
+ if(!confirm("حذف المنتج؟ لن يُحذف سجل عملياته السابقة"))return;
+ db.products=db.products.filter(p=>p.id!==id);save();
+}
+function fillSelects(){
+ ["saleProduct","purchaseProduct"].forEach(id=>{
+  const old=el(id).value;
+  el(id).innerHTML='<option value="">اختر المنتج</option>'+db.products.map(p=>`<option value="${p.id}">${esc(p.name)} — المتوفر ${p.qty}</option>`).join("");
+  if(db.products.some(p=>p.id===old))el(id).value=old;
+ });
+}
+el("saleProduct").addEventListener("change",()=>{
+ const p=db.products.find(x=>x.id===el("saleProduct").value);if(p)el("salePrice").value=p.price;
+});
+el("purchaseProduct").addEventListener("change",()=>{
+ const p=db.products.find(x=>x.id===el("purchaseProduct").value);if(p)el("purchasePrice").value=p.cost;
+});
+el("saleForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const p=db.products.find(x=>x.id===el("saleProduct").value),qty=Number(el("saleQty").value),price=Number(el("salePrice").value);
+ if(!p)return alert("اختر منتجاً");
+ if(!Number.isInteger(qty)||qty<1||qty>p.qty)return alert("الكمية غير متوفرة في المخزون");
+ if(price<0)return alert("السعر غير صحيح");
+ db.records.unshift({id:uid(),type:"بيع",productId:p.id,name:p.name,qty,price,cost:p.cost,total:qty*price,party:el("saleCustomer").value.trim(),date:new Date().toISOString()});
+ p.qty-=qty;e.target.reset();save();alert("تم تسجيل البيع");
+});
+el("purchaseForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const p=db.products.find(x=>x.id===el("purchaseProduct").value),qty=Number(el("purchaseQty").value),price=Number(el("purchasePrice").value);
+ if(!p)return alert("اختر منتجاً");
+ if(!Number.isInteger(qty)||qty<1||price<0)return alert("تحقق من الكمية والسعر");
+ const oldQty=p.qty,totalQty=oldQty+qty;
+ p.cost=totalQty?((oldQty*p.cost)+(qty*price))/totalQty:price;
+ p.qty=totalQty;
+ db.records.unshift({id:uid(),type:"شراء",productId:p.id,name:p.name,qty,price,cost:price,total:qty*price,party:el("purchaseSupplier").value.trim(),date:new Date().toISOString()});
+ e.target.reset();save();alert("تم تسجيل الشراء");
+});
+function deleteRecord(id){
+ if(!confirm("حذف العملية وإرجاع أثرها على المخزون؟"))return;
+ const r=db.records.find(x=>x.id===id);if(!r)return;
+ const p=db.products.find(x=>x.id===r.productId);
+ if(p)p.qty+=r.type==="بيع"?r.qty:-r.qty;
+ db.records=db.records.filter(x=>x.id!==id);save();
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderRecords(){
+ el("recordRows").innerHTML=db.records.length?db.records.map(r=>`<tr>
+ <td>${new Date(r.date).toLocaleString("ar")}</td><td>${r.type}</td><td>${esc(r.name)}</td>
+ <td>${r.qty}</td><td>${money(r.price)}</td><td>${money(r.total)}</td><td>${esc(r.party||"-")}</td>
+ <td><button class="danger" onclick="deleteRecord('${r.id}')">حذف</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty">لا توجد عمليات مسجلة</td></tr>`;
+}
+function render(){
+ const sales=db.records.filter(r=>r.type==="بيع"),buys=db.records.filter(r=>r.type==="شراء");
+ const sum=a=>a.reduce((s,r)=>s+r.total,0);
+ const revenue=sum(sales),purchases=sum(buys);
+ const cost=sales.reduce((s,r)=>s+r.qty*r.cost,0);
+ const profit=revenue-cost;
+ el("salesTotal").textContent=money(revenue);
+ el("purchaseTotal").textContent=money(purchases);
+ el("profitTotal").textContent=money(profit);
+ el("productCount").textContent=db.products.length;
+ el("stockValue").textContent=money(db.products.reduce((s,p)=>s+p.qty*p.cost,0));
+ const day=new Date().toDateString();
+ el("todayCount").textContent=db.records.filter(r=>new Date(r.date).toDateString()===day).length;
+ el("rSales").textContent=money(revenue);
+ el("rCost").textContent=money(cost);
+ el("rProfit").textContent=money(profit);
+ el("rPurchase").textContent=money(purchases);
+ el("recent").innerHTML=db.records.slice(0,5).map(r=>`<p>${r.type==="بيع"?"🟢":"🔵"} ${esc(r.name)} — ${money(r.total)}</p>`).join("")||'<p class="empty">لا توجد عمليات بعد</p>';
+ renderProducts();renderRecords();fillSelects();
+}
+function backup(){
+ const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="JANO-STORE-PRO-backup.json";a.click();URL.revokeObjectURL(a.href);
+}
+function restoreBackup(event){
+ const file=event.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{const data=JSON.parse(reader.result);
+   if(!Array.isArray(data.products)||!Array.isArray(data.records))throw Error();
+   if(confirm("سيتم استبدال البيانات الحالية بالنسخة المختارة. هل تريد المتابعة؟")){db=data;save();alert("تمت استعادة النسخة")}
+  }catch(e){alert("ملف النسخة الاحتياطية غير صالح")}
+  event.target.value="";
+ };
+ reader.readAsText(file);
+}
+render();
+</script>
+</body>
+</html>
+
